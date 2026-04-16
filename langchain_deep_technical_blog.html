@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LangChain: A Deep Technical Guide to Building LLM-Powered Applications</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink2: #3d3d5c;
+    --ink3: #6b6b8a;
+    --bg: #fafaf7;
+    --bg2: #f2f2ed;
+    --bg3: #e8e8e0;
+    --accent: #5b3fc8;
+    --accent2: #8b5cf6;
+    --accent-light: #ede9fe;
+    --teal: #0d9488;
+    --teal-light: #ccfbf1;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --coral: #e05252;
+    --coral-light: #fee2e2;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --border: #d4d4cc;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.8;
+    font-size: 16px;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1e3a5f 100%);
+    color: white;
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(139,92,246,0.25);
+    border: 1px solid rgba(139,92,246,0.4);
+    color: #c4b5fd;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    color: #f0edff;
+  }
+  .hero .subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.65);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); }
+
+  /* NAV / TOC */
+  .toc-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .toc-bar a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink3);
+    text-decoration: none;
+    margin-right: 28px;
+    transition: color 0.2s;
+  }
+  .toc-bar a:hover { color: var(--accent); }
+
+  /* LAYOUT */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 32px; }
+  .section { padding: 60px 0 20px; }
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-top: 16px;
+  }
+  h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 32px 0 12px;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink2);
+    margin: 24px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  p { color: var(--ink2); margin-bottom: 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--ink3); }
+
+  /* SECTION DIVIDER */
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* CALLOUT BOXES */
+  .callout {
+    border-left: 3px solid;
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 24px 0;
+    font-size: 15px;
+  }
+  .callout.info { border-color: var(--accent); background: var(--accent-light); color: var(--ink2); }
+  .callout.tip  { border-color: var(--teal);   background: var(--teal-light);   color: #134e4a; }
+  .callout.warn { border-color: var(--amber);  background: var(--amber-light);  color: #78350f; }
+  .callout.danger { border-color: var(--coral); background: var(--coral-light);  color: #7f1d1d; }
+  .callout-title { font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* CODE BLOCKS */
+  .code-wrap {
+    background: var(--code-bg);
+    border-radius: var(--radius);
+    margin: 24px 0;
+    overflow: hidden;
+    border: 1px solid #313244;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: #181825;
+    border-bottom: 1px solid #313244;
+  }
+  .code-lang {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6c7086;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #f38ba8; }
+  .code-dots span:nth-child(2) { background: #fab387; }
+  .code-dots span:nth-child(3) { background: #a6e3a1; }
+  pre {
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--code-text);
+  }
+  .kw  { color: #cba6f7; } /* keywords */
+  .fn  { color: #89b4fa; } /* functions */
+  .str { color: #a6e3a1; } /* strings */
+  .cm  { color: #585b70; font-style: italic; } /* comments */
+  .va  { color: #89dceb; } /* variables */
+  .nu  { color: #fab387; } /* numbers / imports */
+
+  /* COMPONENT CARDS */
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .comp-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .comp-card:hover { border-color: var(--accent2); box-shadow: 0 4px 20px rgba(91,63,200,0.08); }
+  .comp-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  .comp-card h4 { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 6px; text-transform: none; letter-spacing: 0; }
+  .comp-card p  { font-size: 13px; color: var(--ink3); margin: 0; line-height: 1.5; }
+
+  /* DIAGRAM WRAPPER */
+  .diagram-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 20px 20px;
+    margin: 28px 0;
+    text-align: center;
+  }
+  .diagram-caption {
+    font-size: 13px;
+    color: var(--ink3);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* USE CASE CARDS */
+  .usecase {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .usecase::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .usecase.uc1::before { background: var(--accent); }
+  .usecase.uc2::before { background: var(--teal); }
+  .usecase.uc3::before { background: var(--amber); }
+  .usecase h3 { margin: 0 0 10px; font-size: 18px; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .tag.purple { background: var(--accent-light); color: var(--accent); }
+  .tag.teal   { background: var(--teal-light);   color: var(--teal); }
+  .tag.amber  { background: var(--amber-light);  color: var(--amber); }
+  .tag.green  { background: var(--green-light);  color: var(--green); }
+
+  /* PRO / CON TABLE */
+  .adv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .adv-col { padding: 20px; border-radius: var(--radius); }
+  .adv-col.pros { background: var(--green-light); border: 1px solid #bbf7d0; }
+  .adv-col.cons { background: var(--coral-light);  border: 1px solid #fecaca; }
+  .adv-col h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; text-transform: none; letter-spacing: 0; }
+  .adv-col.pros h4 { color: var(--green); }
+  .adv-col.cons h4 { color: var(--coral); }
+  .adv-col ul { padding-left: 18px; }
+  .adv-col li { font-size: 14px; margin-bottom: 6px; line-height: 1.5; }
+  .adv-col.pros li { color: #166534; }
+  .adv-col.cons li { color: #991b1b; }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 13px;
+    margin-top: 80px;
+  }
+  footer strong { color: rgba(255,255,255,0.8); }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--bg3);
+    padding: 2px 7px;
+    border-radius: 5px;
+    color: var(--accent);
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* SVG DIAGRAM */
+  .arch-svg { width: 100%; max-width: 720px; }
+
+  @media (max-width: 600px) {
+    .adv-grid { grid-template-columns: 1fr; }
+    .hero { padding: 50px 24px 40px; }
+    .container { padding: 0 20px; }
+    .toc-bar { padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Deep Technical Blog &nbsp;·&nbsp; GenAI Series</div>
+    <h1>LangChain: Designing Intelligent LLM Applications from the Ground Up</h1>
+    <p class="subtitle">A comprehensive guide to LangChain's architecture, core components, chains, agents, memory systems, and real-world engineering patterns — with fully working Python code.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span> Data Science Internship · Feb 2026</span>
+      <span><span class="dot"></span> ~1,900 words</span>
+      <span><span class="dot"></span> Python · LangChain · OpenAI</span>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY NAV -->
+<div class="toc-bar">
+  <a href="#intro">Introduction</a>
+  <a href="#components">Core Components</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#code">Code Examples</a>
+  <a href="#usecases">Use Cases</a>
+  <a href="#adv">Advantages & Limits</a>
+  <a href="#conclusion">Conclusion</a>
+</div>
+
+<!-- ======================== SECTION 1 ======================== -->
+<div class="container">
+<section class="section" id="intro">
+  <div class="section-num">1</div>
+  <h2>Introduction to LangChain</h2>
+
+  <p>Large Language Models are impressive in isolation — they can write, reason, and summarize with remarkable fluency. But raw LLM calls are barely scratching the surface of what's possible. Real applications need to <strong>remember past conversations</strong>, <strong>call external tools</strong>, <strong>search private documents</strong>, and <strong>chain multiple reasoning steps together</strong>. Wiring all of this from scratch is a non-trivial engineering problem.</p>
+
+  <p><strong>LangChain</strong> is an open-source Python (and JavaScript) framework that solves exactly this. It provides modular, composable abstractions — from simple prompt templates to full autonomous agents — that let you build production-grade LLM-powered applications without reinventing the wheel every time.</p>
+
+  <div class="callout info">
+    <div class="callout-title">What LangChain solves</div>
+    LangChain handles three hard problems: <strong>Orchestration</strong> (connecting LLMs to data and actions), <strong>Chaining</strong> (routing output of one step as input to the next), and <strong>Tool Integration</strong> (letting the LLM call APIs, search engines, databases, and more).
+  </div>
+
+  <p>Before LangChain, developers hand-rolled fragile glue code — manual prompt formatting, ad-hoc history concatenation, and brittle conditional logic around tool calls. LangChain replaces all of this with a clean, extensible interface. It integrates with OpenAI, Anthropic, HuggingFace, Google, Cohere, and dozens of vector databases out of the box.</p>
+</section>
+
+<!-- ======================== SECTION 2 ======================== -->
+<section class="section" id="components">
+  <div class="section-num">2</div>
+  <h2>Core Components of LangChain</h2>
+
+  <p>LangChain is best understood as a set of composable building blocks. Each component has a single clear responsibility and can be combined with others to form pipelines of arbitrary complexity.</p>
+
+  <div class="component-grid">
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#ede9fe">🧠</div>
+      <h4>LLMs & Chat Models</h4>
+      <p>Unified interface to any language model — OpenAI, Anthropic, HuggingFace, local models.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#ccfbf1">📝</div>
+      <h4>Prompt Templates</h4>
+      <p>Parameterized templates with variables, few-shot examples, and structured formatting.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#fef3c7">⛓️</div>
+      <h4>Chains</h4>
+      <p>Pipelines that compose multiple components — prompt → LLM → parser → another prompt.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#dcfce7">🧩</div>
+      <h4>Memory</h4>
+      <p>Pluggable memory backends (buffer, summary, entity, vector) for persistent conversation state.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#fee2e2">🤖</div>
+      <h4>Agents</h4>
+      <p>Reasoning loops where the LLM decides which tool to use, calls it, and iterates toward a goal.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#e0f2fe">🔧</div>
+      <h4>Tools</h4>
+      <p>Any function the agent can call — web search, calculator, SQL, custom APIs, Python executor.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#f3e8ff">📄</div>
+      <h4>Document Loaders</h4>
+      <p>Ingest PDFs, web pages, Notion, GitHub repos, databases, and 50+ other sources.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-icon" style="background:#fdf4ff">🗄️</div>
+      <h4>Vector Stores</h4>
+      <p>Embed and index documents; retrieve semantically relevant chunks using cosine similarity.</p>
+    </div>
+  </div>
+
+  <!-- LLMs -->
+  <h3>LLMs and Chat Models</h3>
+  <p>LangChain wraps any model behind a common interface. <code>ChatOpenAI</code> is the most common entry point. The key distinction is between <em>completion models</em> (plain text in/out) and <em>chat models</em> (structured message lists with roles). Modern applications almost always use chat models.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># llm_basics.py — Basic LLM call</span>
+<span class="kw">from</span> <span class="nu">langchain_openai</span> <span class="kw">import</span> <span class="fn">ChatOpenAI</span>
+<span class="kw">from</span> <span class="nu">langchain_core.messages</span> <span class="kw">import</span> <span class="fn">HumanMessage</span>, <span class="fn">SystemMessage</span>
+
+<span class="cm"># Initialize model — temperature=0 for deterministic outputs</span>
+<span class="va">llm</span> = <span class="fn">ChatOpenAI</span>(
+    model=<span class="str">"gpt-4o-mini"</span>,
+    temperature=<span class="nu">0</span>,
+    max_tokens=<span class="nu">512</span>
+)
+
+<span class="va">messages</span> = [
+    <span class="fn">SystemMessage</span>(content=<span class="str">"You are a concise data science tutor."</span>),
+    <span class="fn">HumanMessage</span>(content=<span class="str">"Explain gradient descent in 2 sentences."</span>)
+]
+
+<span class="va">response</span> = <span class="va">llm</span>.invoke(<span class="va">messages</span>)
+<span class="fn">print</span>(<span class="va">response</span>.content)
+<span class="cm"># → "Gradient descent is an optimization algorithm that iteratively adjusts
+#    model parameters by moving in the direction of steepest descent of the
+#    loss function. Each update is scaled by the learning rate."</span></pre>
+  </div>
+
+  <!-- Prompt Templates -->
+  <h3>Prompts and Prompt Templates</h3>
+  <p>Hard-coding strings into your LLM calls is fragile. <code>ChatPromptTemplate</code> lets you define reusable, parameterized message templates. Variables are injected at runtime, keeping your logic DRY and testable.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># prompt_templates.py</span>
+<span class="kw">from</span> <span class="nu">langchain_core.prompts</span> <span class="kw">import</span> <span class="fn">ChatPromptTemplate</span>
+
+<span class="va">template</span> = <span class="fn">ChatPromptTemplate</span>.from_messages([
+    (<span class="str">"system"</span>, <span class="str">"You are an expert in {domain}. Be concise and technical."</span>),
+    (<span class="str">"human"</span>,  <span class="str">"Explain: {concept}"</span>)
+])
+
+<span class="cm"># Format fills in variables before sending to the model</span>
+<span class="va">formatted</span> = <span class="va">template</span>.format_messages(
+    domain=<span class="str">"machine learning"</span>,
+    concept=<span class="str">"the attention mechanism"</span>
+)
+<span class="fn">print</span>(<span class="va">formatted</span>[<span class="nu">1</span>].content)
+<span class="cm"># → "Explain: the attention mechanism"</span></pre>
+  </div>
+
+  <!-- Chains -->
+  <h3>Chains — The LCEL Revolution</h3>
+  <p>A Chain is a pipeline that links components together. LangChain's modern API uses <strong>LangChain Expression Language (LCEL)</strong> — the pipe operator (<code>|</code>) composes components lazily, enabling streaming, parallel execution, and easy debugging.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># chains.py — Building chains with LCEL</span>
+<span class="kw">from</span> <span class="nu">langchain_openai</span> <span class="kw">import</span> <span class="fn">ChatOpenAI</span>
+<span class="kw">from</span> <span class="nu">langchain_core.prompts</span> <span class="kw">import</span> <span class="fn">ChatPromptTemplate</span>
+<span class="kw">from</span> <span class="nu">langchain_core.output_parsers</span> <span class="kw">import</span> <span class="fn">StrOutputParser</span>
+
+<span class="va">prompt</span> = <span class="fn">ChatPromptTemplate</span>.from_template(
+    <span class="str">"Summarize the following in one sentence:\n\n{text}"</span>
+)
+<span class="va">llm</span>    = <span class="fn">ChatOpenAI</span>(model=<span class="str">"gpt-4o-mini"</span>)
+<span class="va">parser</span> = <span class="fn">StrOutputParser</span>()
+
+<span class="cm"># LCEL pipe operator: data flows left → right</span>
+<span class="va">chain</span> = <span class="va">prompt</span> | <span class="va">llm</span> | <span class="va">parser</span>
+
+<span class="va">result</span> = <span class="va">chain</span>.invoke({
+    <span class="str">"text"</span>: <span class="str">"LangChain is an open-source framework for building LLM-powered \
+applications. It provides abstractions for prompts, chains, agents, \
+memory, and tool use."</span>
+})
+<span class="fn">print</span>(<span class="va">result</span>)
+<span class="cm"># → "LangChain is an open-source framework that simplifies building
+#    LLM-powered applications through modular abstractions."</span></pre>
+  </div>
+
+  <!-- Memory -->
+  <h3>Memory — Giving the LLM a Mind</h3>
+  <p>LLMs are stateless — every call starts fresh. Memory components bridge this gap by persisting conversation history and injecting it back into future prompts. LangChain offers four main strategies:</p>
+  <ul style="padding-left:22px;margin-bottom:16px;color:var(--ink2)">
+    <li><strong>ConversationBufferMemory</strong> — stores the full raw history (simple, expensive for long chats)</li>
+    <li><strong>ConversationSummaryMemory</strong> — summarizes old turns to save tokens</li>
+    <li><strong>ConversationEntityMemory</strong> — extracts and tracks named entities across turns</li>
+    <li><strong>VectorStoreRetrieverMemory</strong> — stores history as embeddings, retrieves relevant past context</li>
+  </ul>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># memory_example.py</span>
+<span class="kw">from</span> <span class="nu">langchain_openai</span> <span class="kw">import</span> <span class="fn">ChatOpenAI</span>
+<span class="kw">from</span> <span class="nu">langchain.memory</span> <span class="kw">import</span> <span class="fn">ConversationBufferMemory</span>
+<span class="kw">from</span> <span class="nu">langchain.chains</span> <span class="kw">import</span> <span class="fn">ConversationChain</span>
+
+<span class="va">llm</span>    = <span class="fn">ChatOpenAI</span>(model=<span class="str">"gpt-4o-mini"</span>, temperature=<span class="nu">0.5</span>)
+<span class="va">memory</span> = <span class="fn">ConversationBufferMemory</span>()
+
+<span class="va">conv</span> = <span class="fn">ConversationChain</span>(llm=<span class="va">llm</span>, memory=<span class="va">memory</span>, verbose=<span class="kw">False</span>)
+
+<span class="va">r1</span> = <span class="va">conv</span>.predict(input=<span class="str">"My name is Arjun."</span>)
+<span class="va">r2</span> = <span class="va">conv</span>.predict(input=<span class="str">"What's my name?"</span>)
+<span class="fn">print</span>(<span class="va">r2</span>)  <span class="cm"># → "Your name is Arjun."</span>
+
+<span class="cm"># Inspect what's stored in memory</span>
+<span class="fn">print</span>(<span class="va">memory</span>.load_memory_variables({})[<span class="str">"history"</span>])</pre>
+  </div>
+
+  <!-- Agents -->
+  <h3>Agents — LLMs That Take Actions</h3>
+  <p>An Agent is a control loop where the LLM is the <em>brain</em>: given a goal, it chooses a tool to call, inspects the result, then decides whether to call another tool or return a final answer. This ReAct (Reason + Act) pattern enables LLMs to solve multi-step problems dynamically.</p>
+
+  <!-- Tools -->
+  <h3>Tools</h3>
+  <p>Tools are Python callables registered with an agent. LangChain ships 50+ built-in tools (Wikipedia, DuckDuckGo, Python REPL, SQL, Wolfram Alpha) and a <code>@tool</code> decorator to create custom ones in seconds.</p>
+
+  <!-- Document Loaders & Vector Stores -->
+  <h3>Document Loaders and Vector Stores</h3>
+  <p>To build a Q&A system over your own documents, you need two things: a <strong>Document Loader</strong> to ingest content (PDFs, websites, GitHub, Notion…) and a <strong>Vector Store</strong> (FAISS, Chroma, Pinecone, Weaviate) to store embeddings for semantic retrieval. Together they form the Retrieval-Augmented Generation (RAG) pattern.</p>
+</section>
+
+<!-- ======================== SECTION 3 ======================== -->
+<section class="section" id="architecture">
+  <div class="section-num">3</div>
+  <h2>Architecture Explanation</h2>
+  <p>The diagram below maps the complete LangChain execution pipeline — from raw user text to a structured final answer. Memory wraps the entire loop, feeding persistent context back into future turns. The Vector Store sits as a side-channel knowledge source that can be queried at the Chain layer.</p>
+
+  <div class="diagram-wrap">
+    <svg class="arch-svg" viewBox="0 0 720 310" role="img" xmlns="http://www.w3.org/2000/svg">
+      <title>LangChain End-to-End Architecture</title>
+      <desc>Pipeline: User Input → Prompt Template → LLM / Chat Model → Chain Orchestrator → Agent (with Tool) → Final Output. Memory loops back. Vector Store feeds in from the top.</desc>
+      <defs>
+        <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- Background lane -->
+      <rect x="10" y="70" width="700" height="80" rx="14" fill="#f4f0ff" stroke="#c4b5fd" stroke-width="1" stroke-dasharray="5 3"/>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#7c3aed" x="24" y="88" font-weight="600" letter-spacing="0.08em">MAIN PIPELINE</text>
+
+      <!-- Boxes -->
+      <!-- User Input -->
+      <rect x="20" y="95" width="90" height="40" rx="8" fill="#e0e7ff" stroke="#818cf8" stroke-width="1"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#3730a3" x="65" y="112" text-anchor="middle" dominant-baseline="central">User Input</text>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#6366f1" x="65" y="127" text-anchor="middle" dominant-baseline="central">raw text</text>
+
+      <line x1="110" y1="115" x2="128" y2="115" stroke="#818cf8" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <!-- Prompt Template -->
+      <rect x="128" y="90" width="106" height="50" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#5b21b6" x="181" y="110" text-anchor="middle" dominant-baseline="central">Prompt</text>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#7c3aed" x="181" y="127" text-anchor="middle" dominant-baseline="central">Template</text>
+
+      <line x1="234" y1="115" x2="252" y2="115" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <!-- LLM -->
+      <rect x="252" y="90" width="96" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#1d4ed8" x="300" y="110" text-anchor="middle" dominant-baseline="central">LLM /</text>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#3b82f6" x="300" y="127" text-anchor="middle" dominant-baseline="central">Chat Model</text>
+
+      <line x1="348" y1="115" x2="366" y2="115" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <!-- Chain -->
+      <rect x="366" y="90" width="96" height="50" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#0f766e" x="414" y="110" text-anchor="middle" dominant-baseline="central">Chain</text>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#14b8a6" x="414" y="127" text-anchor="middle" dominant-baseline="central">Orchestrator</text>
+
+      <line x1="462" y1="115" x2="480" y2="115" stroke="#0d9488" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <!-- Agent + Tool stacked -->
+      <rect x="480" y="85" width="96" height="40" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#92400e" x="528" y="108" text-anchor="middle" dominant-baseline="central">Agent</text>
+
+      <rect x="480" y="132" width="96" height="36" rx="8" fill="#fee2e2" stroke="#e05252" stroke-width="1"/>
+      <text font-family="Outfit,sans-serif" font-size="12" font-weight="600" fill="#991b1b" x="528" y="153" text-anchor="middle" dominant-baseline="central">Tools</text>
+
+      <line x1="528" y1="125" x2="528" y2="132" stroke="#d97706" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <line x1="576" y1="115" x2="594" y2="115" stroke="#d97706" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <!-- Output -->
+      <rect x="594" y="90" width="100" height="50" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+      <text font-family="Outfit,sans-serif" font-size="13" font-weight="600" fill="#166534" x="644" y="110" text-anchor="middle" dominant-baseline="central">Final</text>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#16a34a" x="644" y="127" text-anchor="middle" dominant-baseline="central">Output</text>
+
+      <!-- Memory loop -->
+      <path d="M644 140 Q644 220 414 220 Q200 220 181 140" fill="none" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#a2)" opacity="0.7"/>
+      <rect x="332" y="228" width="164" height="24" rx="6" fill="#ede9fe"/>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#6d28d9" x="414" y="241" text-anchor="middle" dominant-baseline="central" font-weight="600">Memory (persists context)</text>
+
+      <!-- Vector Store side input -->
+      <rect x="235" y="22" width="130" height="36" rx="8" fill="#f3e8ff" stroke="#9333ea" stroke-width="1" stroke-dasharray="4 3"/>
+      <text font-family="Outfit,sans-serif" font-size="11" fill="#7e22ce" x="300" y="41" text-anchor="middle" dominant-baseline="central" font-weight="600">Vector Store / Docs</text>
+      <line x1="300" y1="58" x2="300" y2="90" stroke="#9333ea" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#a2)" opacity="0.7"/>
+    </svg>
+    <p class="diagram-caption">Figure 1 — LangChain end-to-end architecture. The memory loop and Vector Store are optional but critical for production applications.</p>
+  </div>
+
+  <p>The flow works as follows: raw user text is formatted by a <strong>Prompt Template</strong>, sent to an <strong>LLM</strong>, whose output is routed through a <strong>Chain</strong>. If the task requires external actions, the chain hands off to an <strong>Agent</strong>, which calls one or more <strong>Tools</strong> before producing a final answer. <strong>Memory</strong> wraps the entire loop so that context persists across turns. A <strong>Vector Store</strong> can be queried at any point to inject relevant document chunks.</p>
+</section>
+
+<!-- ======================== SECTION 4 ======================== -->
+<section class="section" id="code">
+  <div class="section-num">4</div>
+  <h2>Hands-on Code Examples</h2>
+
+  <h3>Agent with Tool Use</h3>
+  <p>The following example creates an agent equipped with a web search tool. The LLM autonomously decides when to search, processes the result, and synthesizes a final answer — without any hard-coded if/else logic.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># agent_with_tools.py — ReAct agent using DuckDuckGo search</span>
+<span class="kw">from</span> <span class="nu">langchain_openai</span> <span class="kw">import</span> <span class="fn">ChatOpenAI</span>
+<span class="kw">from</span> <span class="nu">langchain.agents</span> <span class="kw">import</span> <span class="fn">create_react_agent</span>, <span class="fn">AgentExecutor</span>
+<span class="kw">from</span> <span class="nu">langchain_community.tools</span> <span class="kw">import</span> <span class="fn">DuckDuckGoSearchRun</span>
+<span class="kw">from</span> <span class="nu">langchain_core.tools</span> <span class="kw">import</span> <span class="fn">tool</span>
+<span class="kw">from</span> <span class="nu">langchain</span> <span class="kw">import</span> <span class="fn">hub</span>
+
+<span class="cm"># 1. Define tools — built-in + custom</span>
+<span class="va">search</span> = <span class="fn">DuckDuckGoSearchRun</span>()
+
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">calculator</span>(expression: str) -> str:
+    <span class="str">"""Evaluate a mathematical expression. Input must be a valid Python expression."""</span>
+    <span class="kw">try</span>:
+        <span class="kw">return</span> <span class="fn">str</span>(<span class="fn">eval</span>(expression, {<span class="str">"__builtins__"</span>: {}}, {}))
+    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"Error: {e}"</span>
+
+<span class="va">tools</span> = [<span class="va">search</span>, <span class="va">calculator</span>]
+
+<span class="cm"># 2. Pull the ReAct system prompt from LangChain Hub</span>
+<span class="va">prompt</span> = hub.pull(<span class="str">"hwchase17/react"</span>)
+
+<span class="cm"># 3. Create agent + executor</span>
+<span class="va">llm</span>   = <span class="fn">ChatOpenAI</span>(model=<span class="str">"gpt-4o-mini"</span>, temperature=<span class="nu">0</span>)
+<span class="va">agent</span> = <span class="fn">create_react_agent</span>(llm=<span class="va">llm</span>, tools=<span class="va">tools</span>, prompt=<span class="va">prompt</span>)
+<span class="va">executor</span> = <span class="fn">AgentExecutor</span>(agent=<span class="va">agent</span>, tools=<span class="va">tools</span>, verbose=<span class="kw">True</span>)
+
+<span class="cm"># 4. Run it</span>
+<span class="va">result</span> = <span class="va">executor</span>.invoke({
+    <span class="str">"input"</span>: <span class="str">"What is today's USD to INR exchange rate? Multiply it by 1.08."</span>
+})
+<span class="fn">print</span>(<span class="va">result</span>[<span class="str">"output"</span>])</pre>
+  </div>
+
+  <h3>Full RAG Pipeline — Q&amp;A over a PDF</h3>
+  <p>The RAG (Retrieval-Augmented Generation) pattern is the backbone of most enterprise LLM applications. Documents are chunked, embedded, and stored in a vector database. At query time, relevant chunks are retrieved and injected into the prompt as context.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">Python</div>
+    </div>
+    <pre><span class="cm"># rag_pipeline.py — PDF Q&A with FAISS vector store</span>
+<span class="kw">from</span> <span class="nu">langchain_community.document_loaders</span> <span class="kw">import</span> <span class="fn">PyPDFLoader</span>
+<span class="kw">from</span> <span class="nu">langchain.text_splitter</span> <span class="kw">import</span> <span class="fn">RecursiveCharacterTextSplitter</span>
+<span class="kw">from</span> <span class="nu">langchain_openai</span> <span class="kw">import</span> <span class="fn">OpenAIEmbeddings</span>, <span class="fn">ChatOpenAI</span>
+<span class="kw">from</span> <span class="nu">langchain_community.vectorstores</span> <span class="kw">import</span> <span class="fn">FAISS</span>
+<span class="kw">from</span> <span class="nu">langchain.chains</span> <span class="kw">import</span> <span class="fn">RetrievalQA</span>
+
+<span class="cm"># Step 1 — Load and chunk the document</span>
+<span class="va">loader</span>   = <span class="fn">PyPDFLoader</span>(<span class="str">"research_paper.pdf"</span>)
+<span class="va">docs</span>     = <span class="va">loader</span>.load()
+
+<span class="va">splitter</span> = <span class="fn">RecursiveCharacterTextSplitter</span>(
+    chunk_size=<span class="nu">800</span>,
+    chunk_overlap=<span class="nu">100</span>
+)
+<span class="va">chunks</span>   = <span class="va">splitter</span>.split_documents(<span class="va">docs</span>)
+
+<span class="cm"># Step 2 — Embed and store in FAISS (in-memory vector DB)</span>
+<span class="va">embeddings</span> = <span class="fn">OpenAIEmbeddings</span>(model=<span class="str">"text-embedding-3-small"</span>)
+<span class="va">vectordb</span>   = <span class="fn">FAISS</span>.from_documents(<span class="va">chunks</span>, <span class="va">embeddings</span>)
+<span class="va">retriever</span>  = <span class="va">vectordb</span>.as_retriever(search_kwargs={<span class="str">"k"</span>: <span class="nu">4</span>})
+
+<span class="cm"># Step 3 — Build the Q&A chain</span>
+<span class="va">qa_chain</span> = <span class="fn">RetrievalQA</span>.from_chain_type(
+    llm=<span class="fn">ChatOpenAI</span>(model=<span class="str">"gpt-4o-mini"</span>),
+    chain_type=<span class="str">"stuff"</span>,
+    retriever=<span class="va">retriever</span>,
+    return_source_documents=<span class="kw">True</span>
+)
+
+<span class="cm"># Step 4 — Query</span>
+<span class="va">answer</span> = <span class="va">qa_chain</span>.invoke({<span class="str">"query"</span>: <span class="str">"What methodology was used in this study?"</span>})
+<span class="fn">print</span>(<span class="va">answer</span>[<span class="str">"result"</span>])
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"\nSources: {[d.metadata['page'] for d in answer['source_documents']]}"</span>)</pre>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Pro Tip — Chunking Strategy</div>
+    Chunk size dramatically affects RAG quality. 512–1000 tokens per chunk works well for most prose. Always set <code>chunk_overlap=100–200</code> so context isn't lost at boundaries. For structured docs (tables, code), try <code>SemanticChunker</code> instead.
+  </div>
+</section>
+
+<!-- ======================== SECTION 5 ======================== -->
+<section class="section" id="usecases">
+  <div class="section-num">5</div>
+  <h2>Real-World Use Cases</h2>
+
+  <div class="usecase uc1">
+    <h3>1. Enterprise Document Q&amp;A (Internal Knowledge Base)</h3>
+    <p><strong>Problem:</strong> A company has 10,000+ internal PDFs, SOPs, and wiki pages. Employees waste hours searching for answers that are buried in documents.</p>
+    <p><strong>Solution with LangChain:</strong> Ingest all documents using <code>PyPDFLoader</code> and <code>UnstructuredLoader</code>. Embed with OpenAI embeddings. Store in Pinecone or Chroma. Build a <code>ConversationalRetrievalChain</code> with <code>ConversationBufferMemory</code> so employees can ask multi-turn questions like "What does our leave policy say? What about remote work exceptions?"</p>
+    <div class="tag-row">
+      <span class="tag purple">Document Loaders</span>
+      <span class="tag teal">Vector Store</span>
+      <span class="tag amber">Memory</span>
+      <span class="tag green">RetrievalQA</span>
+    </div>
+  </div>
+
+  <div class="usecase uc2">
+    <h3>2. Autonomous Research Assistant</h3>
+    <p><strong>Problem:</strong> A data analyst needs to gather competitive intelligence — pulling data from the web, summarizing articles, and computing statistics — a multi-hour manual task.</p>
+    <p><strong>Solution with LangChain:</strong> A <code>create_react_agent</code> with DuckDuckGo search, a Python REPL tool, and a custom CSV writer tool. The agent is given a goal: "Research the top 5 EV manufacturers by Q4 2025 revenue. Create a comparison table." It autonomously searches, reads pages, extracts numbers, and writes a structured CSV — all with zero human-in-the-loop steps.</p>
+    <div class="tag-row">
+      <span class="tag purple">Agents</span>
+      <span class="tag teal">Web Search Tool</span>
+      <span class="tag amber">Python REPL</span>
+      <span class="tag green">Custom Tools</span>
+    </div>
+  </div>
+
+  <div class="usecase uc3">
+    <h3>3. AI-Powered Customer Support Bot</h3>
+    <p><strong>Problem:</strong> A SaaS company's support team handles 1,000+ repetitive tickets per day. 80% of questions are answered by the documentation.</p>
+    <p><strong>Solution with LangChain:</strong> RAG pipeline over the docs + <code>ConversationSummaryMemory</code> to track issue context across a session. A guardrail chain classifies intent first: if it's a billing issue, route to a human; otherwise, answer from docs. Use <code>StrOutputParser</code> with a custom format instruction to always output a structured JSON with <code>answer</code>, <code>confidence</code>, and <code>escalate</code> fields.</p>
+    <div class="tag-row">
+      <span class="tag purple">RAG</span>
+      <span class="tag teal">Summary Memory</span>
+      <span class="tag amber">Output Parser</span>
+      <span class="tag green">Routing Chain</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SECTION 6 ======================== -->
+<section class="section" id="adv">
+  <div class="section-num">6</div>
+  <h2>Advantages and Limitations</h2>
+
+  <div class="adv-grid">
+    <div class="adv-col pros">
+      <h4>✓ Strengths</h4>
+      <ul>
+        <li>Massive ecosystem — 100+ integrations out of the box</li>
+        <li>Rapid prototyping with LCEL's expressive pipe syntax</li>
+        <li>Pluggable components — swap models, memory, or vector DBs with one line</li>
+        <li>Built-in streaming support for real-time UX</li>
+        <li>LangSmith for tracing, debugging, and evaluation</li>
+        <li>Active community and fast release cycle</li>
+      </ul>
+    </div>
+    <div class="adv-col cons">
+      <h4>✗ Limitations</h4>
+      <ul>
+        <li>Abstraction layers make debugging non-trivial</li>
+        <li>API surface changes frequently (breaking changes are common)</li>
+        <li>Agent loops can be unpredictable or stuck in cycles</li>
+        <li>Latency adds up — each LLM call is ~500ms–2s</li>
+        <li>Cost can escalate with multi-hop agent pipelines</li>
+        <li>Over-engineering risk — many tasks don't need a full agent</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">When NOT to use LangChain</div>
+    If you're making a single, well-defined LLM call with no retrieval, memory, or tool use — just call the OpenAI API directly. LangChain adds overhead that isn't justified for simple completions. Similarly, if your pipeline has strict latency requirements (&lt;200ms), the abstraction layers may be a liability.
+  </div>
+</section>
+
+<!-- ======================== SECTION 7 ======================== -->
+<section class="section" id="conclusion">
+  <div class="section-num">7</div>
+  <h2>Conclusion</h2>
+
+  <p>LangChain represents a fundamental shift in how we build software. Rather than writing static programs, we compose systems that can <em>reason, retrieve, remember, and act</em> — with the LLM as the cognitive engine and LangChain as the nervous system connecting it to the world.</p>
+
+  <p>The most important insight from this deep dive is that LangChain's value is proportional to the complexity of your task. Simple tasks — a single translation, a one-shot classification — don't need it. But as soon as you need multi-turn memory, document grounding, or tool-using autonomy, the framework pays dividends immediately.</p>
+
+  <h3>Key Takeaways</h3>
+  <ul style="padding-left:22px;color:var(--ink2);margin-bottom:20px">
+    <li>LCEL's pipe operator (<code>|</code>) is the cleanest way to compose LLM pipelines — prefer it over legacy chain classes</li>
+    <li>Memory and Vector Stores are what turn a toy demo into a production application</li>
+    <li>Agents are powerful but expensive — always set <code>max_iterations</code> and add a fallback</li>
+    <li>Chunking strategy and embedding model choice are the two biggest levers in RAG quality</li>
+  </ul>
+
+  <h3>Future Scope</h3>
+  <p><strong>LangGraph</strong> (LangChain's sibling framework) extends the model to <em>stateful, cyclical</em> workflows — enabling true multi-agent systems where specialized agents collaborate, hand off tasks, and loop back based on results. This is the frontier: autonomous AI systems that can plan, delegate, and self-correct over arbitrarily long horizons. If you've mastered the concepts in this blog, LangGraph is your logical next step.</p>
+
+  <div class="callout info">
+    <div class="callout-title">Further Reading</div>
+    LangChain Docs: <strong>python.langchain.com</strong> &nbsp;·&nbsp; LangSmith: <strong>smith.langchain.com</strong> &nbsp;·&nbsp; LangGraph: <strong>langchain-ai.github.io/langgraph</strong>
+  </div>
+</section>
+
+<hr/>
+<p style="text-align:center;color:var(--ink3);font-size:14px;padding-bottom:40px">
+  Written for the Data Science Internship — GenAI Assignment, February 2026.<br/>
+  All code examples are tested against <strong>langchain==0.3.x</strong> and <strong>langchain-openai==0.2.x</strong>.
+</p>
+
+</div>
+
+<footer>
+  <strong>LangChain Deep Technical Blog</strong> &nbsp;·&nbsp; Data Science Internship, Feb 2026<br/>
+  Built with Python · LangChain · OpenAI · FAISS
+</footer>
+
+</body>
+</html>
